@@ -2,9 +2,9 @@ name: SonarCloud analysis
 
 on:
   push:
-    branches: [ "master" ]     # <- заміни на "main" якщо у тебе main
+    branches: [ "main" ]     # <- заміни на "main" якщо у тебе main
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -27,8 +27,8 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
           dotnet sonarscanner begin `
-            /d:sonar.projectKey="<YOUR_PROJECT_KEY>" `
-            /d:sonar.organization="<YOUR_ORG_KEY>" `
+            /d:sonar.projectKey="<FEAR-ops_reingeniring>" `
+            /d:sonar.organization="<fear-ops>" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.cs.opencover.reportsPaths="**/coverage.xml" `
             /d:sonar.exclusions=**/bin/**,**/obj/** `
