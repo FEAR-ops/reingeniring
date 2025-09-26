@@ -2,7 +2,7 @@ name: SonarCloud analysis
 
 on:
   push:
-    branches: [ "main" ]     # <- заміни на "main" якщо у тебе main
+    branches: [ "main" ]     # якщо гілка у тебе "master" – зміни
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -16,7 +16,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0   # повна історія для SonarCloud
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -27,29 +28,29 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
           dotnet sonarscanner begin `
-            /d:sonar.projectKey="<FEAR-ops_reingeniring>" `
-            /d:sonar.organization="<fear-ops>" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /k:FEAR-ops_reingeniring `
+            /o:fear-ops `
+            /d:sonar.token=${{ secrets.SONAR_TOKEN }} `
             /d:sonar.cs.opencover.reportsPaths="**/coverage.xml" `
             /d:sonar.exclusions=**/bin/**,**/obj/** `
             /d:sonar.qualitygate.wait=true
         shell: pwsh
 
       - name: Restore
-        run: dotnet restore YourSolution.sln
+        run: dotnet restore NetSdrClient.sln   # заміни на свою .sln
 
       - name: Build
-        run: dotnet build YourSolution.sln -c Release --no-restore
+        run: dotnet build NetSdrClient.sln -c Release --no-restore
 
-      # optional: запускай тести і генеруй coverage в форматі opencover
-      #- name: Test with coverage
-      #  run: |
-      #    dotnet test YourTestProject/YourTestProject.csproj -c Release --no-build `
-      #      /p:CollectCoverage=true `
-      #      /p:CoverletOutput=TestResults/coverage.xml `
-      #      /p:CoverletOutputFormat=opencover
-      #  shell: pwsh
+      # Якщо будеш додавати тести з coverage (opencover)
+      # - name: Test with coverage
+      #   run: |
+      #     dotnet test YourTestProject/YourTestProject.csproj -c Release --no-build `
+      #       /p:CollectCoverage=true `
+      #       /p:CoverletOutput=TestResults/coverage.xml `
+      #       /p:CoverletOutputFormat=opencover
+      #   shell: pwsh
 
       - name: SonarScanner End
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.token=${{ secrets.SONAR_TOKEN }}
         shell: pwsh
